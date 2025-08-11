@@ -95,7 +95,7 @@ function load_mailbox(mailbox) {
       emailList.appendChild(emailItem);
 
       emailItem.addEventListener('click', () => {
-        
+        read_mail(email.id);
       })
 
       if (mailbox === "inbox" && !email.read) {
@@ -123,11 +123,63 @@ function load_mailbox(mailbox) {
   });
 }
 
-function read_mail(email){
+function read_mail(email_id){
 
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#email-view').style.display = 'block';
   document.querySelector('#email-view').innerHTML = "";
-  
+
+  fetch('/emails/' + email_id)
+  .then(response => response.json())
+  .then(email => {
+    const container = document.createElement('div');
+    document.querySelector('#email-view').append(container);
+    if (email.error){
+      container.innerHTML = email.error;
+    }
+    else{
+      container.classList.add('container-lg', 'd-flex', 'flex-column', 'mt-5');
+
+      const fromElm = document.createElement('div');
+      container.appendChild(fromElm);
+      fromElm.innerHTML = "<span style='font-weight: bold;'>From: </span>" + email.sender;
+
+      const recELm = document.createElement('div');
+      recELm.classList.add('mt-3');
+      fromElm.appendChild(recELm);
+
+      const label = document.createElement("div");
+      label.style.fontWeight = 'bold';
+      label.innerHTML = "Recipients: ";
+      recELm.appendChild(label);
+
+      email.recipients.forEach(recipient => {
+        const to = document.createElement('div');
+        to.innerHTML = recipient;
+        recELm.appendChild(to);
+      })
+
+      const body = document.createElement('div');
+      body.classList.add('mt-3');
+      container.appendChild(body);
+
+      const bodyLabel = document.createElement('div');
+      bodyLabel.style.fontWeight = 'bold';
+      bodyLabel.innerHTML = "Body: "
+      body.appendChild(bodyLabel);
+
+      const bodyMessage = document.createElement('div');
+      bodyMessage.innerHTML = email.body;
+      bodyMessage.style.whiteSpace = 'pre-wrap';
+      body.appendChild(bodyMessage);
+
+      fetch('/emails/' + email_id, {
+        method: 'PUT',
+        body: JSON.stringify({
+          read: true
+        })
+      })
+    }
+  })
 }
