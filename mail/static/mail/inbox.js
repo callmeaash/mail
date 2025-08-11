@@ -119,6 +119,46 @@ function load_mailbox(mailbox) {
       subTimeElm.appendChild(timeElm);
       timeElm.innerHTML = email.timestamp;
 
+      if (mailbox == "inbox"){
+        const archiveElm = document.createElement('button');
+        archiveElm.innerHTML = "Archive";
+        archiveElm.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'align-self-end');
+        emailItem.appendChild(archiveElm);
+
+        archiveElm.addEventListener('click', (event) => {
+          event.stopPropagation();
+          fetch('/emails/' + email.id, {
+            method: 'PUT',
+            body: JSON.stringify({
+              archived: true
+            })
+          })
+          .then(() => {
+            load_mailbox('archive');
+          })
+        })
+      }
+
+      if (mailbox == 'archive'){
+        const archiveElm = document.createElement('button');
+        archiveElm.innerHTML = "Unarchive";
+        archiveElm.classList.add('btn', 'btn-outline-success', 'btn-sm', 'align-self-end');
+        emailItem.appendChild(archiveElm);
+
+        archiveElm.addEventListener('click', (event) => {
+          event.stopPropagation();
+          fetch('/emails/' + email.id, {
+            method: 'PUT',
+            body: JSON.stringify({
+              archived: false
+            })
+          })
+          .then(() => {
+            load_mailbox('inbox');
+          })
+        })
+      }
+
     });
   });
 }
