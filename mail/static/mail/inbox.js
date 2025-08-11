@@ -10,11 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
-function compose_email() {
+function compose_email(email='') {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
-    document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -214,6 +214,19 @@ function read_mail(email_id){
       bodyMessage.style.whiteSpace = 'pre-wrap';
       body.appendChild(bodyMessage);
 
+      const user = document.querySelector('h2').innerHTML;
+      console.log(user);
+      if (user != email.sender){
+        const replyBtn = document.createElement('button');
+        replyBtn.classList.add('btn', 'btn-primary', 'w-25', 'mt-4', 'align-self-start');
+        replyBtn.innerHTML = 'Reply';
+        container.appendChild(replyBtn);
+
+        replyBtn.addEventListener('click', () => {
+          reply_email(email);
+        });
+      }
+
       fetch('/emails/' + email_id, {
         method: 'PUT',
         body: JSON.stringify({
@@ -222,4 +235,30 @@ function read_mail(email_id){
       })
     }
   })
+}
+
+
+function reply_email(email){
+
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+
+  // Clear out composition fields
+  document.querySelector('#compose-recipients').value = email.sender;
+  
+  if (email.subject.startsWith('Re:')){
+    document.querySelector('#compose-subject').value = email.subject;
+  }
+  else{
+    document.querySelector('#compose-subject').value = "Re: " + email.subject;
+  }
+  
+  document.querySelector('#compose-body').value = 'On ' + email.timestamp + ' ' + email.sender + ' wrote: \n' + email.body;
+
+  // Clear previous error message
+  document.querySelector('#compose-error').innerHTML = "";
+
+  // Call the submit_email function when form is submitted
+  document.querySelector('#compose-form').onsubmit = submit_email;
 }
