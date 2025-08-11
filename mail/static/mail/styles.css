@@ -1,0 +1,12 @@
+textarea {
+    min-height: 400px;
+}
+
+.divhover:hover{
+    cursor: pointer;
+    border: 1px solid black;
+}
+
+.unreadColor{
+    background-color: rgb(200, 199, 199);
+}
